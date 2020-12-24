@@ -6,18 +6,45 @@ import usb
 event = threading.Event()
 itera = 0
 
-def SetCurrentLimit(channel, value) :
+
+def calc_value(value) :
     data = []
     data.append(value >> 8)
     data.append(value - (data[-1] << 8))
-    
-    return [0x88,0x55,0xaa,0x33,channel] + data
+
+    return data
 
 def get_checksum(msg) :
     sum_ = bin(sum(msg))[2:]
     while len(sum_) > 8 : sum_ = sum_[-8:]
     sum_ = int(sum_,2)
     return sum_
+
+
+def SetCurrentLimit(channel, value) :
+    data = calc_value(value)
+    cmd = [0x88,0x55,0xaa,0x33,channel] + data
+    cmd = cmd + [get_checksum(cmd)]
+    return cmd
+
+def SetVoltageLimit(channel, value) :
+    data = calc_value(value)
+    cmd = [0x88,0x55,0xaa,0x36,channel] + data
+    cmd = cmd + [get_checksum(cmd)]
+    return cmd
+
+def SetModeCurrent(channel, value) :
+    data = calc_value(value)
+    mode = 0x00
+    cmd = [0x89,0x55,0xaa,0x40,channel, mode] + data
+    cmd = cmd + [get_checksum(cmd)]
+    return cmd
+
+def SetVoltage(channel, value) :
+    data = calc_value(value)
+    cmd = [0x88,0x55,0xaa,0x43,channel] + data
+    cmd = cmd + [get_checksum(cmd)]
+    return cmd
 
 def read(epin) :
     print('recv ... ')
