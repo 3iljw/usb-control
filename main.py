@@ -7,12 +7,12 @@ class MainFrame(wx.Frame):
     """Main Frame."""
     def __init__(self):
 
-        wx.Frame.__init__(self, None, title="Motor Control Tool", size=(1150, 900))
+        wx.Frame.__init__(self, None, title="USB control", size=(900, 600))
 
 
         # Create a panel and notebook (tabs holder)
         page = wx.Panel(self)
-        pgnb = wx.Notebook(page, size=(900,600))
+        pgnb = wx.Notebook(page, size=(800,500))
         # self.pnl = wx.Panel(page)
         
         # Create the tab windows
@@ -29,7 +29,17 @@ class MainFrame(wx.Frame):
         # sizer.Add(self.pnl, -1)
 
         page.SetSizer(sizer)
+
+        self.Bind(wx.EVT_CLOSE, self.close)
         self.Center()
+    
+    def close(self, event) :
+        self.tab1.read_thread.open = False
+        self.tab1.read_thread.join()
+        self.tab2.read_thread.open = False 
+        self.tab2.read_thread.join()
+
+        self.Destroy()
 
 if __name__ == "__main__":
     app = wx.App()

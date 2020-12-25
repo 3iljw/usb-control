@@ -6,45 +6,18 @@ import usb
 event = threading.Event()
 itera = 0
 
-
-def calc_value(value) :
+def SetCurrentLimit(channel, value) :
     data = []
     data.append(value >> 8)
     data.append(value - (data[-1] << 8))
-
-    return data
+    
+    return [0x88,0x55,0xaa,0x33,channel] + data
 
 def get_checksum(msg) :
     sum_ = bin(sum(msg))[2:]
     while len(sum_) > 8 : sum_ = sum_[-8:]
     sum_ = int(sum_,2)
     return sum_
-
-
-def SetCurrentLimit(channel, value) :
-    data = calc_value(value)
-    cmd = [0x88,0x55,0xaa,0x33,channel] + data
-    cmd = cmd + [get_checksum(cmd)]
-    return cmd
-
-def SetVoltageLimit(channel, value) :
-    data = calc_value(value)
-    cmd = [0x88,0x55,0xaa,0x36,channel] + data
-    cmd = cmd + [get_checksum(cmd)]
-    return cmd
-
-def SetModeCurrent(channel, value) :
-    data = calc_value(value)
-    mode = 0x00
-    cmd = [0x89,0x55,0xaa,0x40,channel, mode] + data
-    cmd = cmd + [get_checksum(cmd)]
-    return cmd
-
-def SetVoltage(channel, value) :
-    data = calc_value(value)
-    cmd = [0x88,0x55,0xaa,0x43,channel] + data
-    cmd = cmd + [get_checksum(cmd)]
-    return cmd
 
 def read(epin) :
     print('recv ... ')
@@ -72,16 +45,14 @@ def write(epout) :
         event.clear()
         cmd = str(input('input(type \'q\' to quit) : '))
         if cmd == 'q' : break
-        try : snd_cmd = eval(cmd)
-        except : print('Error Command')
-        # cmd = cmd.split(',')
-        # try : cmd = [int(x) for x in cmd]
-        # except ValueError : continue
+        cmd = cmd.split(',')
+        try : cmd = [int(x) for x in cmd]
+        except ValueError : continue
         itera = 0
-        # cmd_data = [0x80+len(cmd)+4, 0x55, 0xAA] + cmd
-        # cmdchecksum = get_checksum(cmd_data)
-        # snd_cmd = cmd_data+[cmdchecksum]
-        # print(snd_cmd)
+        cmd_data = [0x80+len(cmd)+4, 0x55, 0xAA] + cmd
+        cmdchecksum = get_checksum(cmd_data)
+        snd_cmd = cmd_data+[cmdchecksum]
+        print(snd_cmd)
         while not event.is_set() and itera < 3:
             print(datetime.now())
             itera += 1
