@@ -72,14 +72,16 @@ def write(epout) :
         event.clear()
         cmd = str(input('input(type \'q\' to quit) : '))
         if cmd == 'q' : break
-        cmd = cmd.split(',')
-        try : cmd = [int(x) for x in cmd]
-        except ValueError : continue
+        try : snd_cmd = eval(cmd)
+        except : print('Error Command')
+        # cmd = cmd.split(',')
+        # try : cmd = [int(x) for x in cmd]
+        # except ValueError : continue
         itera = 0
-        cmd_data = [0x80+len(cmd)+4, 0x55, 0xAA] + cmd
-        cmdchecksum = get_checksum(cmd_data)
-        snd_cmd = cmd_data+[cmdchecksum]
-        print(snd_cmd)
+        # cmd_data = [0x80+len(cmd)+4, 0x55, 0xAA] + cmd
+        # cmdchecksum = get_checksum(cmd_data)
+        # snd_cmd = cmd_data+[cmdchecksum]
+        # print(snd_cmd)
         while not event.is_set() and itera < 3:
             print(datetime.now())
             itera += 1
